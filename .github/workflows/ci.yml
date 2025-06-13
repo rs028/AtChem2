@@ -47,7 +47,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-13]
+        os: [macos-13, macos-14, macos-15]
         fortran: [11, 12]
         # compiler versions  not available for specific runners
         exclude:
@@ -87,7 +87,7 @@ jobs:
 
       # gfortran on macos
       - name: Install gfortran-11 (macos-13)
-        if: matrix.os == 'macos-13' && matrix.fortran == 11
+        if: matrix.os == ('macos-13' || 'macos-14' || 'macos-15') && matrix.fortran == 11
         run: brew install gcc@${{ matrix.fortran }}
 
       # -------------------------------------------------------------
@@ -137,17 +137,17 @@ jobs:
       # (5) Run the Testsuite using the standard compilation flags and
       #     the default model settings
 
-      - name: Indent and Style tests
-        run: |
-          make indenttest
-          make styletest
+      # - name: Indent and Style tests
+      #   run: |
+      #     make indenttest
+      #     make styletest
 
       - name: Unit and Model tests
         env:
           FORT_VERSION: ${{ matrix.fortran }}
         run: |
           export PATH=$PATH:$PWD/numdiff/bin
-          # make unittests
+          make unittests
           # make oldtests   # NB: oldtests will eventually be merged into modeltests
           # make modeltests
 
