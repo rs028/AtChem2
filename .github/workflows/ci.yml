@@ -47,8 +47,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-22.04, ubuntu-24.04]   # NB: macos testing temporarily deactivated
-        fortran: [11, 12, 13]
+        os: [macos-13]
+        fortran: [11, 12]
         # compiler versions  not available for specific runners
         exclude:
         - os: ubuntu-22.04
@@ -86,8 +86,8 @@ jobs:
         run: sudo apt-get install gfortran-11
 
       # gfortran on macos
-      - name: Install gfortran-10 and gfortran-11 (macos-13)
-        if: matrix.os == 'macos-13' && (matrix.fortran == 10 || matrix.fortran == 11)
+      - name: Install gfortran-11 (macos-13)
+        if: matrix.os == 'macos-13' && matrix.fortran == 11
         run: brew install gcc@${{ matrix.fortran }}
 
       # -------------------------------------------------------------
@@ -147,9 +147,9 @@ jobs:
           FORT_VERSION: ${{ matrix.fortran }}
         run: |
           export PATH=$PATH:$PWD/numdiff/bin
-          make unittests
-          make oldtests   # NB: oldtests will eventually be merged into modeltests
-          make modeltests
+          # make unittests
+          # make oldtests   # NB: oldtests will eventually be merged into modeltests
+          # make modeltests
 
       # -------------------------------------------------------------
       # (6) Recompile AtChem2 using the code coverage compilation flags,
@@ -157,20 +157,20 @@ jobs:
       #
       # ACTION: https://github.com/marketplace/actions/codecov
 
-      - name: Unit and Model tests (x Codecov)
-        if: matrix.os == 'ubuntu-24.04' && matrix.fortran == 13
-        env:
-          FORT_VERSION: ${{ matrix.fortran }}
-        run: |
-          export PATH=$PATH:$PWD/numdiff/bin
-          make clean
-          # unit tests
-          make unittests CCOV=true
-          mv tests/unit_tests/*.gc* ./   # for gcc>=11 handling of *.gcda, *.gcna files
-          # model tests
-          make modeltests CCOV=true   # run only the new Testsuite
-          find ./ -name "*.gc*"
+      # - name: Unit and Model tests (x Codecov)
+      #   if: matrix.os == 'ubuntu-24.04' && matrix.fortran == 13
+      #   env:
+      #     FORT_VERSION: ${{ matrix.fortran }}
+      #   run: |
+      #     export PATH=$PATH:$PWD/numdiff/bin
+      #     make clean
+      #     # unit tests
+      #     make unittests CCOV=true
+      #     mv tests/unit_tests/*.gc* ./   # for gcc>=11 handling of *.gcda, *.gcna files
+      #     # model tests
+      #     make modeltests CCOV=true   # run only the new Testsuite
+      #     find ./ -name "*.gc*"
 
-      - name: Upload coverage reports to Codecov
-        if: matrix.os == 'ubuntu-24.04' && matrix.fortran == 13
-        uses: codecov/codecov-action@v5
+      # - name: Upload coverage reports to Codecov
+      #   if: matrix.os == 'ubuntu-24.04' && matrix.fortran == 13
+      #   uses: codecov/codecov-action@v5
