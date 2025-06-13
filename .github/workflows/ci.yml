@@ -87,7 +87,15 @@ jobs:
 
       # gfortran on macos
       - name: Install gfortran-11 (macos-13)
-        if: matrix.os == ('macos-13' || 'macos-14' || 'macos-15') && matrix.fortran == 11
+        if: matrix.os == 'macos-13' && matrix.fortran == 11
+        run: brew install gcc@${{ matrix.fortran }}
+
+      - name: Install gfortran-14 (macos-14)
+        if: matrix.os == 'macos-13' && matrix.fortran == 11
+        run: brew install gcc@${{ matrix.fortran }}
+
+      - name: Install gfortran-15 (macos-15)
+        if: matrix.os == 'macos-13' && matrix.fortran == 11
         run: brew install gcc@${{ matrix.fortran }}
 
       # -------------------------------------------------------------
