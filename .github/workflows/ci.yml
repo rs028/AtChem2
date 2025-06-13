@@ -48,7 +48,7 @@ jobs:
     strategy:
       matrix:
         os: [macos-13, macos-14, macos-15]
-        fortran: [11, 12]
+        fortran: [11, 12, 13]
         # compiler versions  not available for specific runners
         exclude:
         - os: ubuntu-22.04
@@ -90,12 +90,12 @@ jobs:
         if: matrix.os == 'macos-13' && matrix.fortran == 11
         run: brew install gcc@${{ matrix.fortran }}
 
-      - name: Install gfortran-14 (macos-14)
-        if: matrix.os == 'macos-13' && matrix.fortran == 11
+      - name: Install gfortran-11 (macos-14)
+        if: matrix.os == 'macos-14' && matrix.fortran == 11
         run: brew install gcc@${{ matrix.fortran }}
 
-      - name: Install gfortran-15 (macos-15)
-        if: matrix.os == 'macos-13' && matrix.fortran == 11
+      - name: Install gfortran-11 (macos-15)
+        if: matrix.os == 'macos-15' && matrix.fortran == 11
         run: brew install gcc@${{ matrix.fortran }}
 
       # -------------------------------------------------------------
