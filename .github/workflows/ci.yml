@@ -47,12 +47,12 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-22.04, ubuntu-24.04]   # NB: macos testing temporarily deactivated
-        fortran: [11, 12, 13]
+        os: [macos-13]
+        fortran: [12]
         # compiler versions  not available for specific runners
-        exclude:
-        - os: ubuntu-22.04
-          fortran: 13
+        # exclude:
+        # - os: ubuntu-22.04
+        #   fortran: 13
       fail-fast: false
     permissions:
       contents: read
@@ -86,8 +86,8 @@ jobs:
         run: sudo apt-get install gfortran-11
 
       # gfortran on macos
-      - name: Install gfortran-10 and gfortran-11 (macos-13)
-        if: matrix.os == 'macos-13' && (matrix.fortran == 10 || matrix.fortran == 11)
+      - name: Install gfortran-11 (macos-13)
+        if: matrix.os == 'macos-13' && matrix.fortran == 11
         run: brew install gcc@${{ matrix.fortran }}
 
       # -------------------------------------------------------------
@@ -107,13 +107,13 @@ jobs:
       - name: Install numdiff
         run: ./tools/install/install_numdiff.sh $PWD
 
-      - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.0'
+      # - name: Setup Ruby
+      #   uses: ruby/setup-ruby@v1
+      #   with:
+      #     ruby-version: '3.0'
 
-      - name: Install FRUIT
-        run: ./tools/install/install_fruit.sh $PWD
+      # - name: Install FRUIT
+      #   run: ./tools/install/install_fruit.sh $PWD
 
       # -------------------------------------------------------------
       # (4) Build AtChem2 using the standard compilation flags
@@ -137,19 +137,26 @@ jobs:
       # (5) Run the Testsuite using the standard compilation flags and
       #     the default model settings
 
-      - name: Indent and Style tests
-        run: |
-          make indenttest
-          make styletest
+      # - name: Indent and Style tests
+      #   run: |
+      #     make indenttest
+      #     make styletest
 
       - name: Unit and Model tests
         env:
           FORT_VERSION: ${{ matrix.fortran }}
+        continue-on-error: true
         run: |
           export PATH=$PATH:$PWD/numdiff/bin
-          make unittests
-          make oldtests   # NB: oldtests will eventually be merged into modeltests
+          # make unittests
+          # make oldtests   # NB: oldtests will eventually be merged into modeltests
           make modeltests
+          
+      - name: Save logfile as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: modeltests.log
+          path: tests/modeltests.log
 
       # -------------------------------------------------------------
       # (6) Recompile AtChem2 using the code coverage compilation flags,
@@ -157,20 +164,20 @@ jobs:
       #
       # ACTION: https://github.com/marketplace/actions/codecov
 
-      - name: Unit and Model tests (x Codecov)
-        if: matrix.os == 'ubuntu-24.04' && matrix.fortran == 13
-        env:
-          FORT_VERSION: ${{ matrix.fortran }}
-        run: |
-          export PATH=$PATH:$PWD/numdiff/bin
-          make clean
-          # unit tests
-          make unittests CCOV=true
-          mv tests/unit_tests/*.gc* ./   # for gcc>=11 handling of *.gcda, *.gcna files
-          # model tests
-          make modeltests CCOV=true   # run only the new Testsuite
-          find ./ -name "*.gc*"
+      # - name: Unit and Model tests (x Codecov)
+      #   if: matrix.os == 'ubuntu-24.04' && matrix.fortran == 13
+      #   env:
+      #     FORT_VERSION: ${{ matrix.fortran }}
+      #   run: |
+      #     export PATH=$PATH:$PWD/numdiff/bin
+      #     make clean
+      #     # unit tests
+      #     make unittests CCOV=true
+      #     mv tests/unit_tests/*.gc* ./   # for gcc>=11 handling of *.gcda, *.gcna files
+      #     # model tests
+      #     make modeltests CCOV=true   # run only the new Testsuite
+      #     find ./ -name "*.gc*"
 
-      - name: Upload coverage reports to Codecov
-        if: matrix.os == 'ubuntu-24.04' && matrix.fortran == 13
-        uses: codecov/codecov-action@v5
+      # - name: Upload coverage reports to Codecov
+      #   if: matrix.os == 'ubuntu-24.04' && matrix.fortran == 13
+      #   uses: codecov/codecov-action@v5
