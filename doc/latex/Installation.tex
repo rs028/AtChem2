@@ -1,11 +1,11 @@
 % -----------------------------------------------------------------------------
 %
-% Copyright (c) 2017 Sam Cox, Roberto Sommariva
+% Copyright (c) 2017-2025 Sam Cox, Roberto Sommariva
 %
 % This file is part of the AtChem2 software package.
 %
-% This file is covered by the MIT license which can be found in the file
-% LICENSE.md at the top level of the AtChem2 distribution.
+% This file is licensed under the MIT license, which can be found in the file
+% `LICENSE` at the top level of the AtChem2 distribution.
 %
 % -----------------------------------------------------------------------------
 
@@ -569,6 +569,17 @@ the model constraints, and the model output. In principle, the
 chemical mechanism file (\texttt{.fac}) can be located in any
 directory, although it is recommended to keep it in the
 \texttt{model/} directory with the rest of the configuration files.
+
+The \maindir\ contains the \modeldir, which includes:
+\begin{description}
+\item[\configdir] is 
+\item[\constrdir] is 
+\item[\outdir] is 
+\item[\sharedir] is the directory for the pre-compiled chemical
+  mechanism shared library (\texttt{mechanism.so}).\\
+  By default, it is \texttt{model/configuration/} inside the \maindir.
+\end{description}
+
 
 The \texttt{model/} directory can be given any name and can even be
 located outside the \maindir. Moreover, there can be multiple
