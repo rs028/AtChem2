@@ -49,16 +49,35 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # ubuntu-22
-          - { os: ubuntu-22.04, fortran: 10 }
-          - { os: ubuntu-22.04, fortran: 11 }
-          - { os: ubuntu-22.04, fortran: 12 }
-          # ubuntu-24
-          - { os: ubuntu-24.04, fortran: 11 }
-          - { os: ubuntu-24.04, fortran: 12 }
-          - { os: ubuntu-24.04, fortran: 13, coverage: true }
-          # macos-15  # NB: macos testing temporarily limited
-          - { os: macos-15-intel, fortran: 12 }
+          # # ubuntu-22
+          # - { os: ubuntu-22.04, fortran: 10 }
+          # - { os: ubuntu-22.04, fortran: 11 }
+          # - { os: ubuntu-22.04, fortran: 12 }
+          # # ubuntu-24
+          # - { os: ubuntu-24.04, fortran: 11 }
+          # - { os: ubuntu-24.04, fortran: 12 }
+          # - { os: ubuntu-24.04, fortran: 13, coverage: true }
+          # macos-14 (until Nov 2, 2026
+          - { os: macos-14-large, fortran: 13 }
+          - { os: macos-14-large, fortran: 14 }
+          - { os: macos-14-large, fortran: 15 }
+          - { os: macos-14, fortran: 13 }
+          - { os: macos-14, fortran: 14 }
+          - { os: macos-14, fortran: 15 }
+          # macos-15
+          - { os: macos-15-intel, fortran: 13 }
+          - { os: macos-15-intel, fortran: 14 }
+          - { os: macos-15-intel, fortran: 15 }
+          - { os: macos-15, fortran: 13 }
+          - { os: macos-15, fortran: 14 }
+          - { os: macos-15, fortran: 15 }
+          # macos-26
+          - { os: macos-26-intel, fortran: 13 }
+          - { os: macos-26-intel, fortran: 14 }
+          - { os: macos-26-intel, fortran: 15 }
+          - { os: macos-26, fortran: 13 }
+          - { os: macos-26, fortran: 14 }
+          - { os: macos-26, fortran: 15 }
     permissions:
       contents: read
     env:
@@ -161,9 +180,7 @@ jobs:
       - name: Model tests
         run: |  # oldtests and modeltests will eventually be merged
           make oldtests
-          if [ "$RUNNER_OS" != "macOS" ] ; then
-            make modeltests  # temporarily only on Linux
-          fi
+          make modeltests
 
       - name: Save log files
         if: ${{ !cancelled() }}
