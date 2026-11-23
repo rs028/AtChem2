@@ -58,15 +58,20 @@ jobs:
       matrix:
         include:
           # ubuntu-22
+          - { os: ubuntu-22.04, fortran: 9 }
           - { os: ubuntu-22.04, fortran: 10 }
           - { os: ubuntu-22.04, fortran: 11 }
           - { os: ubuntu-22.04, fortran: 12 }
           # ubuntu-24
           - { os: ubuntu-24.04, fortran: 11 }
           - { os: ubuntu-24.04, fortran: 12 }
-          - { os: ubuntu-24.04, fortran: 13, coverage: true }
-          # macos-15  # NB: macos testing temporarily limited
-          - { os: macos-15-intel, fortran: 12 }
+          - { os: ubuntu-24.04, fortran: 13 }
+          - { os: ubuntu-24.04, fortran: 14 }
+          # ubuntu-26
+          - { os: ubuntu-26.04, fortran: 12 }
+          - { os: ubuntu-26.04, fortran: 13 }
+          - { os: ubuntu-26.04, fortran: 14 }
+          - { os: ubuntu-26.04, fortran: 15 }
     permissions:
       contents: read
     env:
