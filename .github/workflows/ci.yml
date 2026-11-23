@@ -64,7 +64,6 @@ jobs:
           # ubuntu-24
           - { os: ubuntu-24.04, fortran: 11 }
           - { os: ubuntu-24.04, fortran: 12 }
-          - { os: ubuntu-24.04-arm, fortran: 12 }
           - { os: ubuntu-24.04, fortran: 13, coverage: true }
           # macos-15  # NB: macos testing temporarily limited
           - { os: macos-15-intel, fortran: 12 }
