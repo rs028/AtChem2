@@ -3,12 +3,12 @@
 #
 # Copyright (c) 2017-2026 Sam Cox, Roberto Sommariva
 #
-# Copyright (c) 2021 Killian Murphy
-#
 # This file is part of the AtChem2 software package.
 #
 # This file is licensed under the MIT license, which can be found in the file
 # `LICENSE` at the top level of the AtChem2 distribution.
+#
+# Acknowledgements: Killian Murphy [2021]
 #
 # -----------------------------------------------------------------------------
 

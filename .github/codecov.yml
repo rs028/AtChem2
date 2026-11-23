@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------
 #
-# Copyright (c) 2017-2027 Sam Cox, Roberto Sommariva, James Allsopp
+# Copyright (c) 2017-2026 Sam Cox, Roberto Sommariva, James Allsopp
 #
 # This file is part of the AtChem2 software package.
 #
@@ -9,10 +9,20 @@
 #
 # -----------------------------------------------------------------------------
 
+# -------------------------------------------------------------------- #
+# Configuration file for Codecov: https://app.codecov.io/gh/AtChem/AtChem2
+#
+# The CI workflow (`.github/workflows/ci.yml`) uploads two sets of gcov files
+# for each commit, one from the unit tests (flag `unit-tests`) and one from the
+# model tests (flag `model-tests`), which are then combined in a single coverage
+# report.
+
 codecov:
+  # wait for both uploads before posting the status check
   notify:
     after_n_builds: 2
-    
+
+# do not consider files with are not part of the model code
 ignore:
   - "tests/**/*"
   - "fruit_3.4.3/**/*"
