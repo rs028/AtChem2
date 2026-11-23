@@ -3,8 +3,11 @@
 # Copyright (c) 2009-2012 Chris Martin, Kasia Boronska, Jenny Young,
 # Peter Jimack, Mike Pilling
 #
-# Copyright (c) 2017-2027 Sam Cox, Roberto Sommariva, Beth Nelson,
-# Mike Newland, Alfred Mayhew
+# Copyright (c) 2017-2026 Sam Cox, Roberto Sommariva
+#
+# Copyright (c) 2020-2021 Beth Nelson, Mike Newland, Killian Murphy
+#
+# Copyright (c) 2023-2024 Alfred Mayhew
 #
 # This file is part of the AtChem2 software package.
 #

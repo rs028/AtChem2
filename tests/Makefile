@@ -4,7 +4,9 @@
 # Copyright (c) 2009-2012 Chris Martin, Kasia Boronska, Jenny Young,
 # Peter Jimack, Mike Pilling
 #
-# Copyright (c) 2017-2027 Sam Cox, Roberto Sommariva, James Allsopp
+# Copyright (c) 2017-2026 Sam Cox, Roberto Sommariva
+#
+# Copyright (c) 2022-2023 James Allsopp
 #
 # This file is part of the AtChem2 software package.
 #

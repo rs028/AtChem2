@@ -1,7 +1,7 @@
 #!/bin/bash
 # -----------------------------------------------------------------------------
 #
-# Copyright (c) 2017-2027 Sam Cox, Roberto Sommariva
+# Copyright (c) 2017-2026 Sam Cox, Roberto Sommariva
 #
 # This file is part of the AtChem2 software package.
 #
