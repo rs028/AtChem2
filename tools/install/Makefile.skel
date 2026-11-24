@@ -76,16 +76,15 @@ endif
 
 # set the rpath flag
 ifeq ($(OS),Linux)
-  RPATH_OPTION = -R
+  RPATHFLAGS = -Wl,-R,/usr/lib/:$(CVODELIBDIR):$(OPENLIBMDIR)
 else
-  RPATH_OPTION = -rpath
+  RPATHFLAGS = -Wl,-rpath,$(abspath $(CVODELIBDIR)) -Wl,-rpath,$(abspath $(OPENLIBMDIR))
 endif
 
 # set the CVODE and openlibm compilation flags
-LDFLAGS = -L$(CVODELIBDIR) -L$(OPENLIBMDIR) \
-          -Wl,$(RPATH_OPTION),/usr/lib/:$(CVODELIBDIR):$(OPENLIBMDIR) \
-          -lopenlibm -lsundials_fcvode -lsundials_cvode -lsundials_fnvecserial \
-          -lsundials_nvecserial -ldl
+LDFLAGS = -L$(CVODELIBDIR) -L$(OPENLIBMDIR) $(RPATHFLAGS) \
+          -lopenlibm -lsundials_fcvode -lsundials_cvode \
+          -lsundials_fnvecserial -lsundials_nvecserial -ldl
 
 ifeq ($(OS),Darwin)
   LDFLAGS += -Wl,-headerpad_max_install_names
