@@ -60,18 +60,20 @@ jobs:
           # ubuntu-22
           - { os: ubuntu-22.04, fortran: 9 }
           - { os: ubuntu-22.04, fortran: 10 }
-          # - { os: ubuntu-22.04, fortran: 11 }
-          # - { os: ubuntu-22.04, fortran: 12 }
+          - { os: ubuntu-22.04, fortran: 11 }
+          - { os: ubuntu-22.04, fortran: 12 }
+          - { os: ubuntu-22.04-arm, fortran: 11 }
           # ubuntu-24
           - { os: ubuntu-24.04, fortran: 11 }
           - { os: ubuntu-24.04, fortran: 12 }
-          # - { os: ubuntu-24.04, fortran: 13 }
-          # - { os: ubuntu-24.04, fortran: 14 }
+          - { os: ubuntu-24.04, fortran: 13 }
+          - { os: ubuntu-24.04, fortran: 14 }
+          - { os: ubuntu-24.04-arm, fortran: 12 }
           # ubuntu-26
-#          - { os: ubuntu-26.04, fortran: 12 }
-          - { os: ubuntu-26.04, fortran: 13 }
-          - { os: ubuntu-26.04, fortran: 14 }
- #         - { os: ubuntu-26.04, fortran: 15 }
+          # - { os: ubuntu-26.04, fortran: 12 }
+          # - { os: ubuntu-26.04, fortran: 13 }
+          # - { os: ubuntu-26.04, fortran: 14 }
+          # - { os: ubuntu-26.04, fortran: 15 }
     permissions:
       contents: read
     env:
@@ -225,50 +227,50 @@ jobs:
           if-no-files-found: error
 
   # =============================================================== #
-  upload_gcov:
-    # JOB 2 runs on ubuntu, after Job 1 has successfully completed
-    needs: ci_testing
-    runs-on: ubuntu-slim
-    permissions:
-      contents: read
-      id-token: write
+  # upload_gcov:
+  #   # JOB 2 runs on ubuntu, after Job 1 has successfully completed
+  #   needs: ci_testing
+  #   runs-on: ubuntu-slim
+  #   permissions:
+  #     contents: read
+  #     id-token: write
 
-    # -------------------------------------------------------------
-    # Sequence of tasks to be executed as part of the `gcov_upload` job:
-    # 1. Checkout repository
-    # 2. Download coverage files created by Job 1 (`ci_testing`)
-    # 3. Upload coverage files to Codecov
-    steps:
+  #   # -------------------------------------------------------------
+  #   # Sequence of tasks to be executed as part of the `gcov_upload` job:
+  #   # 1. Checkout repository
+  #   # 2. Download coverage files created by Job 1 (`ci_testing`)
+  #   # 3. Upload coverage files to Codecov
+  #   steps:
 
-      # -------------------------------------------------------------
-      # (1) Checkout the repository under $GITHUB_WORKSPACE
-      - name: Checkout repo
-        uses: actions/checkout@v7
-        with:
-          persist-credentials: false
+  #     # -------------------------------------------------------------
+  #     # (1) Checkout the repository under $GITHUB_WORKSPACE
+  #     - name: Checkout repo
+  #       uses: actions/checkout@v7
+  #       with:
+  #         persist-credentials: false
 
-      # -------------------------------------------------------------
-      # (2) Download coverage files
-      - name: Download coverage files
-        uses: actions/download-artifact@v8
-        with:
-          name: coverage_files
-          path: ${{ runner.temp }}
+  #     # -------------------------------------------------------------
+  #     # (2) Download coverage files
+  #     - name: Download coverage files
+  #       uses: actions/download-artifact@v8
+  #       with:
+  #         name: coverage_files
+  #         path: ${{ runner.temp }}
 
-      # -------------------------------------------------------------
-      # (3) Upload coverage files to Codecov, using OIDC authentication
-      - name: Upload Unit test coverage to Codecov
-        uses: codecov/codecov-action@v7
-        with:
-          directory: ${{ runner.temp }}/gcov_unit
-          flags: unit-tests
-          use_oidc: true
-          fail_ci_if_error: true
+  #     # -------------------------------------------------------------
+  #     # (3) Upload coverage files to Codecov, using OIDC authentication
+  #     - name: Upload Unit test coverage to Codecov
+  #       uses: codecov/codecov-action@v7
+  #       with:
+  #         directory: ${{ runner.temp }}/gcov_unit
+  #         flags: unit-tests
+  #         use_oidc: true
+  #         fail_ci_if_error: true
 
-      - name: Upload Model test coverage to Codecov
-        uses: codecov/codecov-action@v7
-        with:
-          directory: ${{ runner.temp }}/gcov_model
-          flags: model-tests
-          use_oidc: true
-          fail_ci_if_error: true
+  #     - name: Upload Model test coverage to Codecov
+  #       uses: codecov/codecov-action@v7
+  #       with:
+  #         directory: ${{ runner.temp }}/gcov_model
+  #         flags: model-tests
+  #         use_oidc: true
+  #         fail_ci_if_error: true

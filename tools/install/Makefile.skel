@@ -78,13 +78,13 @@ endif
 ifeq ($(OS),Linux)
   RPATHFLAGS = -Wl,-R,/usr/lib/:$(CVODELIBDIR):$(OPENLIBMDIR)
 else
-  RPATHFLAGS =  -Wl,-rpath,$(abspath $(CVODELIBDIR)) -Wl,-rpath,$(abspath $(OPENLIBMDIR))
+  RPATHFLAGS = -Wl,-rpath,$(abspath $(CVODELIBDIR)) -Wl,-rpath,$(abspath $(OPENLIBMDIR))
 endif
 
 # set the CVODE and openlibm compilation flags
-LDFLAGS = -L$(CVODELIBDIR) -L$(OPENLIBMDIR) $(RPATHFLAGS)\
-          -lopenlibm -lsundials_fcvode -lsundials_cvode -lsundials_fnvecserial \
-          -lsundials_nvecserial -ldl
+LDFLAGS = -L$(CVODELIBDIR) -L$(OPENLIBMDIR) $(RPATHFLAGS) \
+          -lopenlibm -lsundials_fcvode -lsundials_cvode \
+          -lsundials_fnvecserial -lsundials_nvecserial -ldl
 
 # ----------------------------------------------------
 # EXECUTABLE setup
@@ -146,7 +146,7 @@ $(SHAREDLIB): $(MECH_GEN)
 	$(FORT_COMP) -c $(SRC)/dataStructures.f90 $(FSHAREDFLAGS) -o $(SHAREDLIBDIR)/dataStructures.o -J$(SHAREDLIBDIR) -I$(SHAREDLIBDIR)
 	$(FORT_COMP) -c $(CONFIGDIR)/customRateFuncs.f90 $(FSHAREDFLAGS) -o $(SHAREDLIBDIR)/customRateFuncs.o -J$(SHAREDLIBDIR) -I$(SHAREDLIBDIR)
 	$(FORT_COMP) -c $(SHAREDLIBDIR)/mechanism.f90 $(FSHAREDFLAGS) -o $(SHAREDLIBDIR)/mechanism.o -J$(SHAREDLIBDIR) -I$(SHAREDLIBDIR)
-	$(FORT_COMP) -shared -o $(SHAREDLIB) $(SHAREDLIBDIR)/dataStructures.o $(SHAREDLIBDIR)/customRateFuncs.o $(SHAREDLIBDIR)/mechanism.o  -L$(OPENLIBMDIR) -lopenlibm
+	$(FORT_COMP) -shared -o $(SHAREDLIB) $(SHAREDLIBDIR)/dataStructures.o $(SHAREDLIBDIR)/customRateFuncs.o $(SHAREDLIBDIR)/mechanism.o -L$(OPENLIBMDIR) -lopenlibm
 
 # ====================== Makefile rules ====================== #
 
