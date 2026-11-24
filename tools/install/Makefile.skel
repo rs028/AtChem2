@@ -151,7 +151,7 @@ $(SHAREDLIB): $(MECH_GEN)
 	$(FORT_COMP) -c $(SRC)/dataStructures.f90 $(FSHAREDFLAGS) -o $(SHAREDLIBDIR)/dataStructures.o -J$(SHAREDLIBDIR) -I$(SHAREDLIBDIR)
 	$(FORT_COMP) -c $(CONFIGDIR)/customRateFuncs.f90 $(FSHAREDFLAGS) -o $(SHAREDLIBDIR)/customRateFuncs.o -J$(SHAREDLIBDIR) -I$(SHAREDLIBDIR)
 	$(FORT_COMP) -c $(SHAREDLIBDIR)/mechanism.f90 $(FSHAREDFLAGS) -o $(SHAREDLIBDIR)/mechanism.o -J$(SHAREDLIBDIR) -I$(SHAREDLIBDIR)
-	$(FORT_COMP) -shared -o $(SHAREDLIB) $(SHAREDLIBDIR)/dataStructures.o $(SHAREDLIBDIR)/customRateFuncs.o $(SHAREDLIBDIR)/mechanism.o
+	$(FORT_COMP) -shared -o $(SHAREDLIB) $(SHAREDLIBDIR)/dataStructures.o $(SHAREDLIBDIR)/customRateFuncs.o $(SHAREDLIBDIR)/mechanism.o -L$(OPENLIBMDIR) -lopenlibm
 
 # ====================== Makefile rules ====================== #
 
