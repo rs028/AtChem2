@@ -112,13 +112,14 @@ jobs:
 
       # -------------------------------------------------------------
       # (3) Install the AtChem2 dependencies: CVODE, openlibm, numdiff, FRUIT
+
+      - name: Install openlibm
+        run: ./tools/install/install_openlibm.sh "$PWD"
+
       - name: Install CVODE
         env: # temporary fix until cvode is updated
           CMAKE_POLICY_VERSION_MINIMUM: "3.5"
         run: ./tools/install/install_cvode.sh "$PWD" "$(command -v gfortran-$FORT_VERSION)"
-
-      - name: Install openlibm
-        run: ./tools/install/install_openlibm.sh "$PWD"
 
       - name: Install numdiff
         run: |
@@ -161,6 +162,7 @@ jobs:
           echo "::endgroup::"
           echo "::group::maths symbols in atchem2"
           nm -mu atchem2 | grep -E '_(exp|log10|log|pow|sin|cos) ' || true
+          nm -mu cvode/lib/libsundials_cvode.dylib | grep -E '_(exp|pow|sqrt) '
           echo "::endgroup::"
           for lib in cvode/lib/libsundials_cvode*.dylib; do
             echo "::group::otool -L $lib"
