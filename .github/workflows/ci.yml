@@ -160,14 +160,17 @@ jobs:
           otool -L atchem2
           echo "::endgroup::"
           echo "::group::maths symbols in atchem2"
-          nm -mu atchem2 | grep -E ' _(exp|log|pow|sqrt|sin|cos) \('
+          nm -mu atchem2 | grep -E '_(exp|log10|log|pow|sin|cos) ' || true
           echo "::endgroup::"
           for lib in cvode/lib/libsundials_cvode*.dylib; do
             echo "::group::otool -L $lib"
             otool -L "$lib"
             echo "::endgroup::"
           done
-
+          echo "::group::mechanism.so"
+          otool -L model/sharedlib/mechanism.so
+          nm -mu model/sharedlib/mechanism.so | grep -E '_(exp|log10|log|pow|sin|cos) ' || true
+          echo "::endgroup::"
       # -------------------------------------------------------------
       # (5) Run the Testsuite with standard compilation flags and default
       # model settings, then upload the log files as artifacts

@@ -87,6 +87,10 @@ LDFLAGS = -L$(CVODELIBDIR) -L$(OPENLIBMDIR) \
           -lopenlibm -lsundials_fcvode -lsundials_cvode -lsundials_fnvecserial \
           -lsundials_nvecserial -ldl
 
+ifeq ($(OS),Darwin)
+  LDFLAGS += -Wl,-headerpad_max_install_names
+endif
+
 # ----------------------------------------------------
 # EXECUTABLE setup
 
