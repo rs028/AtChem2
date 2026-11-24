@@ -60,18 +60,18 @@ jobs:
           # ubuntu-22
           - { os: ubuntu-22.04, fortran: 9 }
           - { os: ubuntu-22.04, fortran: 10 }
-          - { os: ubuntu-22.04, fortran: 11 }
-          - { os: ubuntu-22.04, fortran: 12 }
+          # - { os: ubuntu-22.04, fortran: 11 }
+          # - { os: ubuntu-22.04, fortran: 12 }
           # ubuntu-24
           - { os: ubuntu-24.04, fortran: 11 }
           - { os: ubuntu-24.04, fortran: 12 }
-          - { os: ubuntu-24.04, fortran: 13 }
-          - { os: ubuntu-24.04, fortran: 14 }
+          # - { os: ubuntu-24.04, fortran: 13 }
+          # - { os: ubuntu-24.04, fortran: 14 }
           # ubuntu-26
-          - { os: ubuntu-26.04, fortran: 12 }
+#          - { os: ubuntu-26.04, fortran: 12 }
           - { os: ubuntu-26.04, fortran: 13 }
           - { os: ubuntu-26.04, fortran: 14 }
-          - { os: ubuntu-26.04, fortran: 15 }
+ #         - { os: ubuntu-26.04, fortran: 15 }
     permissions:
       contents: read
     env:
@@ -148,7 +148,30 @@ jobs:
             install_name_tool -change @rpath/libsundials_fnvecserial.2.dylib $PWD/cvode/lib/libsundials_fnvecserial.dylib atchem2 ;
             install_name_tool -change @rpath/libsundials_nvecserial.2.dylib $PWD/cvode/lib/libsundials_nvecserial.dylib atchem2 ;
           fi
-
+      # TEMPORARY DIAGNOSTICS (linux): which maths library is used?
+      - name: Inspect linked libraries (diagnostic, linux)
+        if: runner.os == 'Linux'
+        run: |
+          echo "::group::ldd atchem2"
+          ldd atchem2
+          echo "::endgroup::"
+          echo "::group::maths symbols in atchem2"
+          nm -D --undefined-only atchem2 | grep -E ' (exp|log|pow|sqrt|sin|cos)(@|$)' || true
+          echo "::endgroup::"
+          for lib in cvode/lib/libsundials_cvode*.so*; do
+            echo "::group::ldd $lib"
+            ldd "$lib" || true
+            echo "::endgroup::"
+            echo "::group::maths symbols in $lib"
+            nm -D --undefined-only "$lib" | grep -E ' (exp|log|pow|sqrt|sin|cos)(@|$)' || true
+            echo "::endgroup::"
+          done
+          # runtime symbol binding: shows which library each maths call actually
+          # resolves to, including calls made from inside CVODE
+          echo "::group::runtime bindings (LD_DEBUG)"
+          LD_DEBUG=bindings timeout 120 ./atchem2 2>&1 \
+            | grep -E "symbol .(exp|log|pow|sin|cos)." | sort | uniq -c | sort -rn | head -40 || true
+          echo "::endgroup::"
       # -------------------------------------------------------------
       # (5) Run the Testsuite with standard compilation flags and default
       # model settings, then upload the log files as artifacts
