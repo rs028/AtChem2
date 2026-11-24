@@ -109,13 +109,13 @@ jobs:
 
       # -------------------------------------------------------------
       # (3) Install the AtChem2 dependencies: CVODE, openlibm, numdiff, FRUIT
+      - name: Install openlibm
+        run: ./tools/install/install_openlibm.sh "$PWD"
+
       - name: Install CVODE
         env: # temporary fix until cvode is updated
           CMAKE_POLICY_VERSION_MINIMUM: "3.5"
         run: ./tools/install/install_cvode.sh "$PWD" "$(command -v gfortran-$FORT_VERSION)"
-
-      - name: Install openlibm
-        run: ./tools/install/install_openlibm.sh "$PWD"
 
       - name: Install numdiff
         run: |
