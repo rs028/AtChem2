@@ -163,6 +163,13 @@ jobs:
               echo "$f: not found"
             fi
           done
+          # which functions contain the fused instructions?
+          for f in atchem2 openlibm/libopenlibm.so.4; do
+            echo "== $f"
+            objdump -d "$f" \
+              | awk '/^[0-9a-f]+ <.*>:/ {fn=$2} /[[:space:]](fmadd|fmsub|fnmadd|fnmsub|fmla|fmls)[[:space:]]/ {print fn}' \
+              | sort | uniq -c || true
+          done
 
       - name: Inspect linked libraries (diagnostic, linux)
         if: runner.os == 'Linux'
