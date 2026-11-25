@@ -55,6 +55,13 @@ else
     fi
 fi
 
+# check openlibm is installed
+OPENLIBM_DIR="$DEP_DIR/openlibm"
+if [ ! -d "$OPENLIBM_DIR" ] ; then
+    printf "\n[cvode] openlibm not found in %s (install it first)\n" "$OPENLIBM_DIR"
+    exit 1
+fi
+
 # download archive
 SUNDIALS_DIR="sundials-${SUNDIALS_VERSION}"
 SUNDIALS_ARCHIVE="v${SUNDIALS_VERSION}.tar.gz"
@@ -79,6 +86,8 @@ mkdir build/ && cd build/
 cmake -DCMAKE_INSTALL_PREFIX="$DEP_DIR/cvode" \
       -DCMAKE_C_COMPILER:FILEPATH=gcc \
       -DCMAKE_Fortran_COMPILER=$FORT_COMP \
+      -DUSE_GENERIC_MATH:BOOL=OFF \
+      -DCMAKE_SHARED_LINKER_FLAGS="-L$OPENLIBM_DIR -lopenlibm" \
       -DBUILD_ARKODE:BOOL=OFF \
       -DBUILD_CVODE:BOOL=ON \
       -DBUILD_CVODES:BOOL=OFF \

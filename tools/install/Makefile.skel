@@ -44,7 +44,7 @@ ifeq ($(GITHUB_ACTIONS),true)
     FORT_COMP = gfortran-$(FORT_VERSION)
   else
     # on macOS, pass homebrew gfortran
-    FORT_COMP = /usr/local/bin/gfortran-$(FORT_VERSION)
+    FORT_COMP = $(shell command -v gfortran-$(FORT_VERSION))
   endif
 # if not on GitHub Actions, set the Fortran compiler
 else
@@ -57,17 +57,20 @@ else
   endif
 endif
 
+# floating-point behaviour: disable fused multiply-add contraction (diagnostic for ARM)
+FPFLAGS = -ffp-contract=off
+
 # set the main compilation flags for each compiler
 CCOV = false
 ifeq ($(FORTC),"gnu")
-  FFLAGS = -ffree-form -fimplicit-none -Wall -Wpedantic -fPIC
+  FFLAGS = -ffree-form -fimplicit-none -Wall -Wpedantic -fPIC $(FPFLAGS)
   ifeq ($(CCOV),true)    # add gcov flags for code coverage testing
     FFLAGS += -fprofile-arcs -ftest-coverage
   else    # add optimization flag  and run-time checks for normal usage
     FFLAGS += -O2 -fcheck=all
   endif
   FSHAREDFLAGS = -ffree-line-length-none -ffree-form -fimplicit-none -Wall -Wpedantic \
-                 -Wno-unused-dummy-argument -fcheck=all -fPIC -shared
+                 -Wno-unused-dummy-argument -fcheck=all -fPIC -shared $(FPFLAGS)
 endif
 ifeq ($(FORTC),"intel")
   FFLAGS       = -free -implicitnone -warn all -check all -fpic -O2
@@ -76,16 +79,19 @@ endif
 
 # set the rpath flag
 ifeq ($(OS),Linux)
-  RPATH_OPTION = -R
+  RPATHFLAGS = -Wl,-R,/usr/lib/:$(CVODELIBDIR):$(OPENLIBMDIR)
 else
-  RPATH_OPTION = -rpath
+  RPATHFLAGS = -Wl,-rpath,$(abspath $(CVODELIBDIR)) -Wl,-rpath,$(abspath $(OPENLIBMDIR))
 endif
 
 # set the CVODE and openlibm compilation flags
-LDFLAGS = -L$(CVODELIBDIR) -L$(OPENLIBMDIR) \
-          -Wl,$(RPATH_OPTION),/usr/lib/:$(CVODELIBDIR):$(OPENLIBMDIR) \
-          -lopenlibm -lsundials_fcvode -lsundials_cvode -lsundials_fnvecserial \
-          -lsundials_nvecserial -ldl
+LDFLAGS = -L$(CVODELIBDIR) -L$(OPENLIBMDIR) $(RPATHFLAGS) \
+          -lopenlibm -lsundials_fcvode -lsundials_cvode \
+          -lsundials_fnvecserial -lsundials_nvecserial -ldl
+
+ifeq ($(OS),Darwin)
+  LDFLAGS += -Wl,-headerpad_max_install_names
+endif
 
 # ----------------------------------------------------
 # EXECUTABLE setup
@@ -147,7 +153,7 @@ $(SHAREDLIB): $(MECH_GEN)
 	$(FORT_COMP) -c $(SRC)/dataStructures.f90 $(FSHAREDFLAGS) -o $(SHAREDLIBDIR)/dataStructures.o -J$(SHAREDLIBDIR) -I$(SHAREDLIBDIR)
 	$(FORT_COMP) -c $(CONFIGDIR)/customRateFuncs.f90 $(FSHAREDFLAGS) -o $(SHAREDLIBDIR)/customRateFuncs.o -J$(SHAREDLIBDIR) -I$(SHAREDLIBDIR)
 	$(FORT_COMP) -c $(SHAREDLIBDIR)/mechanism.f90 $(FSHAREDFLAGS) -o $(SHAREDLIBDIR)/mechanism.o -J$(SHAREDLIBDIR) -I$(SHAREDLIBDIR)
-	$(FORT_COMP) -shared -o $(SHAREDLIB) $(SHAREDLIBDIR)/dataStructures.o $(SHAREDLIBDIR)/customRateFuncs.o $(SHAREDLIBDIR)/mechanism.o
+	$(FORT_COMP) -shared -o $(SHAREDLIB) $(SHAREDLIBDIR)/dataStructures.o $(SHAREDLIBDIR)/customRateFuncs.o $(SHAREDLIBDIR)/mechanism.o -L$(OPENLIBMDIR) -lopenlibm
 
 # ====================== Makefile rules ====================== #
 
