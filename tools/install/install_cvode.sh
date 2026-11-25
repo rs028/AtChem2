@@ -79,6 +79,8 @@ mkdir build/ && cd build/
 cmake -DCMAKE_INSTALL_PREFIX="$DEP_DIR/cvode" \
       -DCMAKE_C_COMPILER:FILEPATH=gcc \
       -DCMAKE_Fortran_COMPILER=$FORT_COMP \
+      -DUSE_GENERIC_MATH:BOOL=OFF \
+      -DCMAKE_SHARED_LINKER_FLAGS="-L$DEP_DIR/openlibm -lopenlibm" \
       -DBUILD_ARKODE:BOOL=OFF \
       -DBUILD_CVODE:BOOL=ON \
       -DBUILD_CVODES:BOOL=OFF \

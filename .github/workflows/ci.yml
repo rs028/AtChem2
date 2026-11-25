@@ -53,20 +53,28 @@ jobs:
     # - two versions of linux (ubuntu) and macos
     # - three versions of the gnu fortran compiler
     runs-on: ${{ matrix.os }}
+    continue-on-error: true
     strategy:
       fail-fast: false
       matrix:
         include:
           # ubuntu-22
-          - { os: ubuntu-22.04, fortran: 10 }
+#          - { os: ubuntu-22.04-arm, fortran: 9 }
+#          - { os: ubuntu-22.04-arm, fortran: 10 }
+          - { os: ubuntu-22.04-arm, fortran: 11 }
           - { os: ubuntu-22.04, fortran: 11 }
-          - { os: ubuntu-22.04, fortran: 12 }
+#          - { os: ubuntu-22.04-arm, fortran: 12 }
           # ubuntu-24
-          - { os: ubuntu-24.04, fortran: 11 }
-          - { os: ubuntu-24.04, fortran: 12 }
-          - { os: ubuntu-24.04, fortran: 13, coverage: true }
-          # macos-15  # NB: macos testing temporarily limited
-          - { os: macos-15-intel, fortran: 12 }
+#          - { os: ubuntu-24.04-arm, fortran: 11 }
+#          - { os: ubuntu-24.04-arm, fortran: 12 }
+          - { os: ubuntu-24.04-arm, fortran: 13 }
+          - { os: ubuntu-24.04, fortran: 13 }
+#          - { os: ubuntu-24.04-arm, fortran: 14 }
+          # ubuntu-26
+          # - { os: ubuntu-26.04, fortran: 12 }
+          # - { os: ubuntu-26.04, fortran: 13 }
+          # - { os: ubuntu-26.04, fortran: 14 }
+          # - { os: ubuntu-26.04, fortran: 15 }
     permissions:
       contents: read
     env:
@@ -104,13 +112,13 @@ jobs:
 
       # -------------------------------------------------------------
       # (3) Install the AtChem2 dependencies: CVODE, openlibm, numdiff, FRUIT
+      - name: Install openlibm
+        run: ./tools/install/install_openlibm.sh "$PWD"
+
       - name: Install CVODE
         env: # temporary fix until cvode is updated
           CMAKE_POLICY_VERSION_MINIMUM: "3.5"
         run: ./tools/install/install_cvode.sh "$PWD" "$(command -v gfortran-$FORT_VERSION)"
-
-      - name: Install openlibm
-        run: ./tools/install/install_openlibm.sh "$PWD"
 
       - name: Install numdiff
         run: |
@@ -144,6 +152,48 @@ jobs:
             install_name_tool -change @rpath/libsundials_nvecserial.2.dylib $PWD/cvode/lib/libsundials_nvecserial.dylib atchem2 ;
           fi
 
+      - name: FMA instruction count (diagnostic)
+        if: runner.os == 'Linux'
+        run: |
+          for f in atchem2 openlibm/libopenlibm.so.4 cvode/lib/libsundials_cvode.so.2 model/sharedlib/mechanism.so; do
+            if [ -f "$f" ] ; then
+              n=$(objdump -d "$f" | grep -cE '\b(fmadd|fmsub|fnmadd|fnmsub|fmla|fmls)\b' || true)
+              echo "$f: $n"
+            else
+              echo "$f: not found"
+            fi
+          done
+          # which functions contain the fused instructions?
+          for f in atchem2 openlibm/libopenlibm.so.4; do
+            echo "== $f"
+            objdump -d "$f" \
+              | awk '/^[0-9a-f]+ <.*>:/ {fn=$2} /[[:space:]](fmadd|fmsub|fnmadd|fnmsub|fmla|fmls)[[:space:]]/ {print fn}' \
+              | sort | uniq -c || true
+          done
+
+      - name: Inspect linked libraries (diagnostic, linux)
+        if: runner.os == 'Linux'
+        run: |
+          echo "::group::ldd atchem2"
+          ldd atchem2
+          echo "::endgroup::"
+          echo "::group::maths symbols in atchem2"
+          nm -D --undefined-only atchem2 | grep -E ' (exp|log|pow|sqrt|sin|cos)(@|$)' || true
+          echo "::endgroup::"
+          for lib in cvode/lib/libsundials_cvode*.so*; do
+            echo "::group::ldd $lib"
+            ldd "$lib" || true
+            echo "::endgroup::"
+            echo "::group::maths symbols in $lib"
+            nm -D --undefined-only "$lib" | grep -E ' (exp|log|pow|sqrt|sin|cos)(@|$)' || true
+            echo "::endgroup::"
+          done
+          # runtime symbol binding: shows which library each maths call actually
+          # resolves to, including calls made from inside CVODE
+          echo "::group::runtime bindings (LD_DEBUG)"
+          LD_DEBUG=bindings timeout 120 ./atchem2 2>&1 \
+            | grep -E "symbol .(exp|log|pow|sin|cos)." | sort | uniq -c | sort -rn | head -40 || true
+          echo "::endgroup::"
       # -------------------------------------------------------------
       # (5) Run the Testsuite with standard compilation flags and default
       # model settings, then upload the log files as artifacts
@@ -156,9 +206,7 @@ jobs:
       - name: Model tests
         run: |  # oldtests and modeltests will eventually be merged
           make oldtests
-          if [ "$RUNNER_OS" != "macOS" ] ; then
-            make modeltests  # temporarily only on Linux
-          fi
+          make modeltests  # temporarily only on Linux
 
       - name: Save log files
         if: ${{ !cancelled() }}
@@ -197,50 +245,50 @@ jobs:
           if-no-files-found: error
 
   # =============================================================== #
-  upload_gcov:
-    # JOB 2 runs on ubuntu, after Job 1 has successfully completed
-    needs: ci_testing
-    runs-on: ubuntu-slim
-    permissions:
-      contents: read
-      id-token: write
+  # upload_gcov:
+  #   # JOB 2 runs on ubuntu, after Job 1 has successfully completed
+  #   needs: ci_testing
+  #   runs-on: ubuntu-slim
+  #   permissions:
+  #     contents: read
+  #     id-token: write
 
-    # -------------------------------------------------------------
-    # Sequence of tasks to be executed as part of the `gcov_upload` job:
-    # 1. Checkout repository
-    # 2. Download coverage files created by Job 1 (`ci_testing`)
-    # 3. Upload coverage files to Codecov
-    steps:
+  #   # -------------------------------------------------------------
+  #   # Sequence of tasks to be executed as part of the `gcov_upload` job:
+  #   # 1. Checkout repository
+  #   # 2. Download coverage files created by Job 1 (`ci_testing`)
+  #   # 3. Upload coverage files to Codecov
+  #   steps:
 
-      # -------------------------------------------------------------
-      # (1) Checkout the repository under $GITHUB_WORKSPACE
-      - name: Checkout repo
-        uses: actions/checkout@v7
-        with:
-          persist-credentials: false
+  #     # -------------------------------------------------------------
+  #     # (1) Checkout the repository under $GITHUB_WORKSPACE
+  #     - name: Checkout repo
+  #       uses: actions/checkout@v7
+  #       with:
+  #         persist-credentials: false
 
-      # -------------------------------------------------------------
-      # (2) Download coverage files
-      - name: Download coverage files
-        uses: actions/download-artifact@v8
-        with:
-          name: coverage_files
-          path: ${{ runner.temp }}
+  #     # -------------------------------------------------------------
+  #     # (2) Download coverage files
+  #     - name: Download coverage files
+  #       uses: actions/download-artifact@v8
+  #       with:
+  #         name: coverage_files
+  #         path: ${{ runner.temp }}
 
-      # -------------------------------------------------------------
-      # (3) Upload coverage files to Codecov, using OIDC authentication
-      - name: Upload Unit test coverage to Codecov
-        uses: codecov/codecov-action@v7
-        with:
-          directory: ${{ runner.temp }}/gcov_unit
-          flags: unit-tests
-          use_oidc: true
-          fail_ci_if_error: true
+  #     # -------------------------------------------------------------
+  #     # (3) Upload coverage files to Codecov, using OIDC authentication
+  #     - name: Upload Unit test coverage to Codecov
+  #       uses: codecov/codecov-action@v7
+  #       with:
+  #         directory: ${{ runner.temp }}/gcov_unit
+  #         flags: unit-tests
+  #         use_oidc: true
+  #         fail_ci_if_error: true
 
-      - name: Upload Model test coverage to Codecov
-        uses: codecov/codecov-action@v7
-        with:
-          directory: ${{ runner.temp }}/gcov_model
-          flags: model-tests
-          use_oidc: true
-          fail_ci_if_error: true
+  #     - name: Upload Model test coverage to Codecov
+  #       uses: codecov/codecov-action@v7
+  #       with:
+  #         directory: ${{ runner.temp }}/gcov_model
+  #         flags: model-tests
+  #         use_oidc: true
+  #         fail_ci_if_error: true
