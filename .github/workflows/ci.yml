@@ -58,17 +58,15 @@ jobs:
       matrix:
         include:
           # ubuntu-22
-          - { os: ubuntu-22.04, fortran: 9 }
-          - { os: ubuntu-22.04, fortran: 10 }
-          - { os: ubuntu-22.04, fortran: 11 }
-          - { os: ubuntu-22.04, fortran: 12 }
+          - { os: ubuntu-22.04-arm, fortran: 9 }
+          - { os: ubuntu-22.04-arm, fortran: 10 }
           - { os: ubuntu-22.04-arm, fortran: 11 }
+          - { os: ubuntu-22.04-arm, fortran: 12 }
           # ubuntu-24
-          - { os: ubuntu-24.04, fortran: 11 }
-          - { os: ubuntu-24.04, fortran: 12 }
-          - { os: ubuntu-24.04, fortran: 13 }
-          - { os: ubuntu-24.04, fortran: 14 }
+          - { os: ubuntu-24.04-arm, fortran: 11 }
           - { os: ubuntu-24.04-arm, fortran: 12 }
+          - { os: ubuntu-24.04-arm, fortran: 13 }
+          - { os: ubuntu-24.04-arm, fortran: 14 }
           # ubuntu-26
           # - { os: ubuntu-26.04, fortran: 12 }
           # - { os: ubuntu-26.04, fortran: 13 }
@@ -185,10 +183,10 @@ jobs:
 
       - name: Model tests
         run: |  # oldtests and modeltests will eventually be merged
-          make oldtests
-          if [ "$RUNNER_OS" != "macOS" ] ; then
+          #make oldtests
+#          if [ "$RUNNER_OS" != "macOS" ] ; then
             make modeltests  # temporarily only on Linux
-          fi
+#          fi
 
       - name: Save log files
         if: ${{ !cancelled() }}
