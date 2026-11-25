@@ -184,9 +184,7 @@ jobs:
       - name: Model tests
         run: |  # oldtests and modeltests will eventually be merged
           #make oldtests
-#          if [ "$RUNNER_OS" != "macOS" ] ; then
-            make modeltests  # temporarily only on Linux
-#          fi
+          make modeltests  # temporarily only on Linux
 
       - name: Save log files
         if: ${{ !cancelled() }}
