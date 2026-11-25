@@ -151,11 +151,19 @@ jobs:
             install_name_tool -change @rpath/libsundials_fnvecserial.2.dylib $PWD/cvode/lib/libsundials_fnvecserial.dylib atchem2 ;
             install_name_tool -change @rpath/libsundials_nvecserial.2.dylib $PWD/cvode/lib/libsundials_nvecserial.dylib atchem2 ;
           fi
+
+      - name: FMA instruction count (diagnostic)
+        if: runner.os == 'Linux'
+        run: |
           for f in atchem2 openlibm/libopenlibm.so.4 cvode/lib/libsundials_cvode.so.2 model/sharedlib/mechanism.so; do
-            printf '%s: ' "$f"; objdump -d "$f" | grep -cE '\b(fmadd|fmsub|fnmadd|fnmsub|fmla|fmls)\b'
+            if [ -f "$f" ] ; then
+              n=$(objdump -d "$f" | grep -cE '\b(fmadd|fmsub|fnmadd|fnmsub|fmla|fmls)\b' || true)
+              echo "$f: $n"
+            else
+              echo "$f: not found"
+            fi
           done
 
-      # TEMPORARY DIAGNOSTICS (linux): which maths library is used?
       - name: Inspect linked libraries (diagnostic, linux)
         if: runner.os == 'Linux'
         run: |
