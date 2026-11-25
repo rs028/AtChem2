@@ -44,7 +44,7 @@ ifeq ($(GITHUB_ACTIONS),true)
     FORT_COMP = gfortran-$(FORT_VERSION)
   else
     # on macOS, pass homebrew gfortran
-    FORT_COMP = /usr/local/bin/gfortran-$(FORT_VERSION)
+    FORT_COMP = $(shell command -v gfortran-$(FORT_VERSION))
   endif
 # if not on GitHub Actions, set the Fortran compiler
 else

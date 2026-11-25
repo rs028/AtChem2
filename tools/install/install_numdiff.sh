@@ -59,9 +59,9 @@ rm -f "$NUMDIFF_ARCHIVE"
 # compile and install
 cd "${NUMDIFF_DIR}"
 if [ "$(uname -s)" = 'Darwin' ]; then
-    ./configure --prefix=$1/numdiff CPPFLAGS=-I/usr/local/Cellar/gettext/0.20.1/include/ LDFLAGS=-L/usr/local/Cellar/gettext/0.20.1/lib
+    ./configure --prefix=$1/numdiff --disable-nls #CPPFLAGS=-I/usr/local/Cellar/gettext/0.20.1/include/ LDFLAGS=-L/usr/local/Cellar/gettext/0.20.1/lib
 else
-    ./configure --prefix=$1/numdiff
+    ./configure --prefix=$1/numdiff --disable-nls
 fi
 if [ $? -ne 0 ] ; then
     printf "\n[numdiff] configure --> FAIL\n"
