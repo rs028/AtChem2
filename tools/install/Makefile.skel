@@ -57,17 +57,20 @@ else
   endif
 endif
 
+# floating-point behaviour: disable fused multiply-add contraction (diagnostic for ARM)
+FPFLAGS = -ffp-contract=off
+
 # set the main compilation flags for each compiler
 CCOV = false
 ifeq ($(FORTC),"gnu")
-  FFLAGS = -ffree-form -fimplicit-none -Wall -Wpedantic -fPIC
+  FFLAGS = -ffree-form -fimplicit-none -Wall -Wpedantic -fPIC $(FPFLAGS)
   ifeq ($(CCOV),true)    # add gcov flags for code coverage testing
     FFLAGS += -fprofile-arcs -ftest-coverage
   else    # add optimization flag  and run-time checks for normal usage
     FFLAGS += -O2 -fcheck=all
   endif
   FSHAREDFLAGS = -ffree-line-length-none -ffree-form -fimplicit-none -Wall -Wpedantic \
-                 -Wno-unused-dummy-argument -fcheck=all -fPIC -shared
+                 -Wno-unused-dummy-argument -fcheck=all -fPIC -shared $(FPFLAGS)
 endif
 ifeq ($(FORTC),"intel")
   FFLAGS       = -free -implicitnone -warn all -check all -fpic -O2
