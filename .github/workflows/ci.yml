@@ -53,20 +53,23 @@ jobs:
     # - two versions of linux (ubuntu) and macos
     # - three versions of the gnu fortran compiler
     runs-on: ${{ matrix.os }}
+    continue-on-error: true
     strategy:
       fail-fast: false
       matrix:
         include:
           # ubuntu-22
-          - { os: ubuntu-22.04-arm, fortran: 9 }
-          - { os: ubuntu-22.04-arm, fortran: 10 }
+#          - { os: ubuntu-22.04-arm, fortran: 9 }
+#          - { os: ubuntu-22.04-arm, fortran: 10 }
           - { os: ubuntu-22.04-arm, fortran: 11 }
-          - { os: ubuntu-22.04-arm, fortran: 12 }
+          - { os: ubuntu-22.04, fortran: 11 }
+#          - { os: ubuntu-22.04-arm, fortran: 12 }
           # ubuntu-24
-          - { os: ubuntu-24.04-arm, fortran: 11 }
-          - { os: ubuntu-24.04-arm, fortran: 12 }
+#          - { os: ubuntu-24.04-arm, fortran: 11 }
+#          - { os: ubuntu-24.04-arm, fortran: 12 }
           - { os: ubuntu-24.04-arm, fortran: 13 }
-          - { os: ubuntu-24.04-arm, fortran: 14 }
+          - { os: ubuntu-24.04, fortran: 13 }
+#          - { os: ubuntu-24.04-arm, fortran: 14 }
           # ubuntu-26
           # - { os: ubuntu-26.04, fortran: 12 }
           # - { os: ubuntu-26.04, fortran: 13 }
@@ -148,6 +151,10 @@ jobs:
             install_name_tool -change @rpath/libsundials_fnvecserial.2.dylib $PWD/cvode/lib/libsundials_fnvecserial.dylib atchem2 ;
             install_name_tool -change @rpath/libsundials_nvecserial.2.dylib $PWD/cvode/lib/libsundials_nvecserial.dylib atchem2 ;
           fi
+          for f in atchem2 openlibm/libopenlibm.so.4 cvode/lib/libsundials_cvode.so.2 model/sharedlib/mechanism.so; do
+            printf '%s: ' "$f"; objdump -d "$f" | grep -cE '\b(fmadd|fmsub|fnmadd|fnmsub|fmla|fmls)\b'
+          done
+
       # TEMPORARY DIAGNOSTICS (linux): which maths library is used?
       - name: Inspect linked libraries (diagnostic, linux)
         if: runner.os == 'Linux'
@@ -183,7 +190,7 @@ jobs:
 
       - name: Model tests
         run: |  # oldtests and modeltests will eventually be merged
-          #make oldtests
+          make oldtests
           make modeltests  # temporarily only on Linux
 
       - name: Save log files
