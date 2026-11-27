@@ -50,8 +50,9 @@ jobs:
   # =============================================================== #
   ci_testing:
     # JOB 1 runs on:
-    # - two versions of linux (ubuntu) and macos
+    # - three versions of linux (ubuntu) and two version of macos
     # - three versions of the gnu fortran compiler
+    # - intel and arm architectures
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -61,12 +62,33 @@ jobs:
           - { os: ubuntu-22.04, fortran: 10 }
           - { os: ubuntu-22.04, fortran: 11 }
           - { os: ubuntu-22.04, fortran: 12 }
+          - { os: ubuntu-22.04-arm, fortran: 10 }
+          - { os: ubuntu-22.04-arm, fortran: 11 }
+          - { os: ubuntu-22.04-arm, fortran: 12 }
           # ubuntu-24
           - { os: ubuntu-24.04, fortran: 11 }
           - { os: ubuntu-24.04, fortran: 12 }
           - { os: ubuntu-24.04, fortran: 13, coverage: true }
-          # macos-15  # NB: macos testing temporarily limited
+          - { os: ubuntu-24.04-arm, fortran: 11 }
+          - { os: ubuntu-24.04-arm, fortran: 12 }
+          - { os: ubuntu-24.04-arm, fortran: 13 }
+          # ubuntu-26
+          - { os: ubuntu-26.04, fortran: 12 }
+          - { os: ubuntu-26.04, fortran: 13 }
+          - { os: ubuntu-26.04, fortran: 14 }
+          - { os: ubuntu-26.04-arm, fortran: 12 }
+          - { os: ubuntu-26.04-arm, fortran: 13 }
+          - { os: ubuntu-26.04-arm, fortran: 14 }
+          # macos-15
           - { os: macos-15-intel, fortran: 12 }
+          - { os: macos-15-intel, fortran: 13 }
+          - { os: macos-15, fortran: 12 }
+          - { os: macos-15, fortran: 13 }
+          # macos-26
+          - { os: macos-26-intel, fortran: 12 }
+          - { os: macos-26-intel, fortran: 13 }
+          - { os: macos-26, fortran: 12 }
+          - { os: macos-26, fortran: 13 }
     permissions:
       contents: read
     env:
@@ -103,14 +125,14 @@ jobs:
           brew install gcc@$FORT_VERSION
 
       # -------------------------------------------------------------
-      # (3) Install the AtChem2 dependencies: CVODE, openlibm, numdiff, FRUIT
+      # (3) Install the AtChem2 dependencies: openlibm, CVODE, numdiff, FRUIT
+      - name: Install openlibm
+        run: ./tools/install/install_openlibm.sh "$PWD"
+
       - name: Install CVODE
         env: # temporary fix until cvode is updated
           CMAKE_POLICY_VERSION_MINIMUM: "3.5"
         run: ./tools/install/install_cvode.sh "$PWD" "$(command -v gfortran-$FORT_VERSION)"
-
-      - name: Install openlibm
-        run: ./tools/install/install_openlibm.sh "$PWD"
 
       - name: Install numdiff
         run: |
@@ -156,9 +178,7 @@ jobs:
       - name: Model tests
         run: |  # oldtests and modeltests will eventually be merged
           make oldtests
-          if [ "$RUNNER_OS" != "macOS" ] ; then
-            make modeltests  # temporarily only on Linux
-          fi
+          make modeltests
 
       - name: Save log files
         if: ${{ !cancelled() }}
@@ -220,7 +240,7 @@ jobs:
           persist-credentials: false
 
       # -------------------------------------------------------------
-      # (2) Download coverage files
+      # (2) Download gcov files
       - name: Download coverage files
         uses: actions/download-artifact@v8
         with:
@@ -228,7 +248,7 @@ jobs:
           path: ${{ runner.temp }}
 
       # -------------------------------------------------------------
-      # (3) Upload coverage files to Codecov, using OIDC authentication
+      # (3) Upload gcov files to Codecov, using OIDC authentication
       - name: Upload Unit test coverage to Codecov
         uses: codecov/codecov-action@v7
         with:

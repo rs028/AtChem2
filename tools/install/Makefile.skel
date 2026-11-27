@@ -54,7 +54,7 @@ ifeq ($(GITHUB_ACTIONS),true)
     FORT_COMP = gfortran-$(FORT_VERSION)
   else
     # on macOS, pass homebrew gfortran
-    FORT_COMP = /usr/local/bin/gfortran-$(FORT_VERSION)
+    FORT_COMP = $(shell command -v gfortran-$(FORT_VERSION))
   endif
 # set the fortran compiler
 else
@@ -72,7 +72,7 @@ endif
 # - FF_SOURCE: free-form source, no implicit typing
 # - FF_WARN: compiler warnings, including a check for non-standard fortran
 # - FF_CHECK: run-time checks
-# - FF_PIC: position-independent code (needed by the shared library)
+# - FF_PIC: position-independent code (executable and shared library)
 # - FF_OPT: optimization (executable and shared library)
 # - FF_SHARED: build a shared library with additional flags (no limit to the length
 #              of the source line; suppress warning for unused dummy arguments)
@@ -82,7 +82,7 @@ ifeq ($(FORTC),gnu)
   FF_SOURCE   = -ffree-form -fimplicit-none
   FF_WARN     = -Wall -Wpedantic
   FF_CHECK    = -fcheck=all
-  FF_PIC      = -fPIC
+  FF_PIC      = -fPIC -ffp-contract=off
   FF_OPT      = -O2
   FF_SHARED   = -shared -ffree-line-length-none -Wno-unused-dummy-argument
   FF_COV      = -fprofile-arcs -ftest-coverage
@@ -91,7 +91,7 @@ ifeq ($(FORTC),intel)
   FF_SOURCE   = -free -implicitnone
   FF_WARN     = -warn all -stand
   FF_CHECK    = -check all
-  FF_PIC      = -fpic
+  FF_PIC      = -fpic -ffp-contract=off
   FF_OPT      = -O2
   FF_SHARED   = -shared
   FF_COV      =
