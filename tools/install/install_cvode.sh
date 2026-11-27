@@ -20,7 +20,7 @@
 # can be specified by optional input argument `$2`.
 #
 # Website: https://computing.llnl.gov/projects/sundials/
-# Requirements: wget, gcc, fortran, cmake, make
+# Requirements: wget, gcc, fortran, openlibm, cmake, make
 #
 # Usage:
 #   ./install_cvode.sh ~/path/to/dependencies/directory
@@ -58,6 +58,13 @@ else
     fi
 fi
 
+# check that openlibm is installed
+OPENLIBM_DIR="$DEP_DIR/openlibm"
+if [ ! -d "$OPENLIBM_DIR" ] ; then
+    printf "\n[cvode] openlibm not found in %s (install it first)\n" "$OPENLIBM_DIR"
+    exit 1
+fi
+
 # download archive
 SUNDIALS_RELEASE="sundials-${SUNDIALS_VERSION}"
 SUNDIALS_ARCHIVE="v${SUNDIALS_VERSION}.tar.gz"
@@ -81,6 +88,8 @@ export CMAKE_POLICY_VERSION_MINIMUM=3.5 # needed with CMake 4.x (SUNDIALS v2.7.0
 if ! cmake -DCMAKE_INSTALL_PREFIX="$DEP_DIR/cvode" \
            -DCMAKE_C_COMPILER:FILEPATH=gcc \
            -DCMAKE_Fortran_COMPILER="$FORT_COMP" \
+           -DUSE_GENERIC_MATH:BOOL=OFF \
+           -DCMAKE_SHARED_LINKER_FLAGS="-L$OPENLIBM_DIR -lopenlibm" \
            -DBUILD_ARKODE:BOOL=OFF \
            -DBUILD_CVODE:BOOL=ON \
            -DBUILD_CVODES:BOOL=OFF \
